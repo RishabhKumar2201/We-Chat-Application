@@ -1,3 +1,6 @@
+import 'dart:convert';
+import 'dart:developer';
+
 import 'package:chat_app/api/apis.dart';
 import 'package:chat_app/widgets/chat_user_card.dart';
 import 'package:flutter/material.dart';
@@ -48,13 +51,29 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       ),
 
-      body: ListView.builder(
-        padding: EdgeInsets.only(top: mq.height * 0.01),
-          itemCount: 16,
-          physics: BouncingScrollPhysics(),
-          itemBuilder: (context, index) {
-            return const ChatUserCard();
-          }),
+      body: StreamBuilder(
+        stream: APIs.firestore.collection('users').snapshots(),
+        builder: (context, snapshot) {
+          final list = [];
+
+          if(snapshot.hasData){
+            final data = snapshot.data?.docs;
+            for(var i in data!){
+                  log('Data: ${jsonEncode(i.data())}');
+                  list.add(i.data()['name']);
+            }
+          }
+
+          return ListView.builder(
+              itemCount: list.length,
+              padding: EdgeInsets.only(top: mq.height * 0.01),
+              physics: BouncingScrollPhysics(),
+              itemBuilder: (context, index) {
+                //return const ChatUserCard();
+                return Text('Name: ${list[index]}');
+              });
+        },
+      ),
     );
   }
 }

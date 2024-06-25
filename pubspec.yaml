@@ -19,6 +19,8 @@ dependencies:
   firebase_auth:
   # For handling google sign in
   google_sign_in:
+  # For handling cloud firestore database
+  cloud_firestore:
 
 dev_dependencies:
   flutter_test:
