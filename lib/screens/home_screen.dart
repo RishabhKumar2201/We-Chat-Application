@@ -1,4 +1,9 @@
+import 'package:chat_app/api/apis.dart';
+import 'package:chat_app/widgets/chat_user_card.dart';
 import 'package:flutter/material.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+
+import '../main.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -14,9 +19,11 @@ class _HomeScreenState extends State<HomeScreen> {
       //appBar
       appBar: AppBar(
         leading: Icon(Icons.home),
-        title: Text("We Chat", style: TextStyle(
-            color: Colors.black, fontWeight: FontWeight.normal, fontSize: 19),),
-
+        title: Text(
+          "We Chat",
+          style: TextStyle(
+              color: Colors.black, fontWeight: FontWeight.normal, fontSize: 19),
+        ),
         actions: [
           //Search user button
           IconButton(onPressed: () {}, icon: Icon(Icons.search)),
@@ -30,10 +37,24 @@ class _HomeScreenState extends State<HomeScreen> {
       floatingActionButton: Padding(
         padding: const EdgeInsets.only(bottom: 10),
         child: FloatingActionButton(
-          onPressed: (){},
+          onPressed: () {
+            //Sign out function
+            _signOut() async {
+              await APIs.auth.signOut();
+              await GoogleSignIn().signOut();
+            }
+          },
           child: Icon(Icons.add_comment_rounded),
         ),
       ),
+
+      body: ListView.builder(
+        padding: EdgeInsets.only(top: mq.height * 0.01),
+          itemCount: 16,
+          physics: BouncingScrollPhysics(),
+          itemBuilder: (context, index) {
+            return const ChatUserCard();
+          }),
     );
   }
 }
