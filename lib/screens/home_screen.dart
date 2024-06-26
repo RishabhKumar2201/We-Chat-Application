@@ -3,6 +3,7 @@ import 'dart:developer';
 
 import 'package:chat_app/api/apis.dart';
 import 'package:chat_app/models/chat_user.dart';
+import 'package:chat_app/screens/auth/login_screen.dart';
 import 'package:chat_app/widgets/chat_user_card.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -45,11 +46,12 @@ class _HomeScreenState extends State<HomeScreen> {
         child: FloatingActionButton(
           onPressed: () {
             //Sign out function
-            _signOut() async {
-              await APIs.auth.signOut();
-              await GoogleSignIn().signOut();
-            }
-          },
+
+               APIs.auth.signOut();
+               GoogleSignIn().signOut();
+               Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => LoginScreen()));
+
+            },
           child: Icon(Icons.add_comment_rounded),
         ),
       ),

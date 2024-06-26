@@ -21,6 +21,8 @@ dependencies:
   google_sign_in:
   # For handling cloud firestore database
   cloud_firestore:
+  # For showing network image
+  cached_network_image:
 
 dev_dependencies:
   flutter_test:

@@ -18,7 +18,6 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-
   bool _isAnimate = false;
 
   @override
@@ -32,32 +31,40 @@ class _LoginScreenState extends State<LoginScreen> {
     });
   }
 
-  _handleGoogleBtnClick(){
+  _handleGoogleBtnClick() {
     //For showing progress bar
     Dialogs.showProgressBar(context);
 
-    _signInWithGoogle().then((user){
-
+    _signInWithGoogle().then((user) async {
       // For removing progress bar
       Navigator.pop(context);
 
-      if(user != null){
+      if (user != null) {
         print("User Credentials: ${user.credential}");
         print("User info: ${user.user}");
-        Navigator.push(context, MaterialPageRoute(builder: (_) => const HomeScreen()));
-      }
 
+        if (await APIs.userExists()) {
+          Navigator.push(
+              context, MaterialPageRoute(builder: (_) => const HomeScreen()));
+        } else {
+          await APIs.createUser().then((value) {
+            Navigator.push(
+                context, MaterialPageRoute(builder: (_) => const HomeScreen()));
+          });
+        }
+      }
     });
   }
 
   Future<UserCredential?> _signInWithGoogle() async {
-    try{
+    try {
       await InternetAddress.lookup("google.com");
       // Trigger the authentication flow
       final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
 
       // Obtain the auth details from the request
-      final GoogleSignInAuthentication? googleAuth = await googleUser?.authentication;
+      final GoogleSignInAuthentication? googleAuth =
+          await googleUser?.authentication;
 
       // Create a new credential
       final credential = GoogleAuthProvider.credential(
@@ -92,7 +99,6 @@ class _LoginScreenState extends State<LoginScreen> {
       //Body
       body: Stack(
         children: [
-
           //App Logo (Adding Animation to logo)
           AnimatedPositioned(
               top: mq.height * .15, //15% from top
