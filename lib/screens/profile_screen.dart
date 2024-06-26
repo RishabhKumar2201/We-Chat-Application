@@ -1,14 +1,9 @@
-import 'dart:ui';
-
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:chat_app/api/apis.dart';
 import 'package:chat_app/models/chat_user.dart';
 import 'package:chat_app/screens/auth/login_screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/painting.dart';
-import 'package:flutter/rendering.dart';
-import 'package:flutter/widgets.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
 import '../main.dart';
@@ -51,11 +46,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
               Navigator.pushReplacement(context,
                   MaterialPageRoute(builder: (context) => LoginScreen()));
             },
-            icon: const Icon(Icons.logout_outlined, size: 26,color: Colors.white,),
-            label: const Text('Logout', style: TextStyle(
-              fontSize: 16,
-              color: Colors.white
-            ),),
+            icon: const Icon(
+              Icons.logout_outlined,
+              size: 26,
+              color: Colors.white,
+            ),
+            label: const Text(
+              'Logout',
+              style: TextStyle(fontSize: 16, color: Colors.white),
+            ),
           ),
         ),
 
@@ -83,6 +82,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
               //For adding some space
               SizedBox(height: mq.height * 0.03),
+
+              //User email label
               Text(
                 widget.user.email,
                 style: const TextStyle(
@@ -93,6 +94,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
               //For adding some space
               SizedBox(height: mq.height * 0.05),
+
+              //Input field of User Name section
               TextFormField(
                   initialValue: widget.user.name,
                   decoration: InputDecoration(
@@ -103,15 +106,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         style: TextStyle(fontSize: mq.height * 0.023),
                       ),
                       border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10),
+                        borderRadius: BorderRadius.circular(10),
                       ))),
 
+              //For adding more space
               SizedBox(height: mq.height * 0.03),
 
+              // Input field of About section
               TextFormField(
                   initialValue: widget.user.about,
                   decoration: InputDecoration(
-                      prefixIcon: const Icon(Icons.info_outline, color: Colors.blue),
+                      prefixIcon:
+                          const Icon(Icons.info_outline, color: Colors.blue),
                       hintText: 'eg. Feeling Happy!',
                       label: Text(
                         'About',
@@ -120,20 +126,26 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(10)))),
 
+              //for adding more space
               SizedBox(height: mq.height * 0.05),
 
+              //Button for updating profile
               ElevatedButton.icon(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blue,
-                  shape: StadiumBorder(),
-                  minimumSize: Size(mq.width * 0.5, mq.height * 0.06)
+                    backgroundColor: Colors.blue,
+                    shape: StadiumBorder(),
+                    minimumSize: Size(mq.width * 0.5, mq.height * 0.06)),
+                onPressed: () {},
+                icon: const Icon(
+                  Icons.edit,
+                  color: Colors.white,
+                  size: 26,
                 ),
-                  onPressed: (){},
-                  icon: const Icon(Icons.edit, color: Colors.white,size: 26,),
-                 label: Text('UPDATE', style: TextStyle(
-                   color: Colors.white,
-                   fontSize: 16
-                 ),),)
+                label: Text(
+                  'UPDATE',
+                  style: TextStyle(color: Colors.white, fontSize: 16),
+                ),
+              )
             ],
           ),
         ));
