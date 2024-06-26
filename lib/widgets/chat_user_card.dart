@@ -1,16 +1,22 @@
+import 'package:chat_app/models/chat_user.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import '../main.dart';
 
+//Card to represent a single user on Home Screen
 class ChatUserCard extends StatefulWidget {
-  const ChatUserCard({super.key});
+
+  final ChatUser user;
+
+  const ChatUserCard({super.key, required this.user});
 
   @override
   State<ChatUserCard> createState() => _ChatUserCardState();
 }
 
 class _ChatUserCardState extends State<ChatUserCard> {
+
   @override
   Widget build(BuildContext context) {
     return Card(
@@ -20,10 +26,14 @@ class _ChatUserCardState extends State<ChatUserCard> {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
       child: InkWell(
         onTap: () {},
-        child: const ListTile(
+        child: ListTile(
+          //user profile picture
           leading: CircleAvatar(child: Icon(CupertinoIcons.person)),
-          title: Text('Demo User'),
-          subtitle: Text('Last user message', maxLines: 1,),
+          //user name
+          title: Text(widget.user.name),
+          //last message
+          subtitle: Text(widget.user.about, maxLines: 1,),
+          //last message time
           trailing: Text('12:00 PM', style: TextStyle(
             color: Colors.black54
           ),),
