@@ -1,5 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:chat_app/api/apis.dart';
+import 'package:chat_app/helper/dialogs.dart';
 import 'package:chat_app/models/chat_user.dart';
 import 'package:chat_app/screens/auth/login_screen.dart';
 import 'package:flutter/cupertino.dart';
@@ -33,18 +34,32 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
         ),
 
-        //Floating button to add new user
+        //Floating button to log out user
         floatingActionButton: Padding(
           padding: const EdgeInsets.only(bottom: 10),
           child: FloatingActionButton.extended(
             backgroundColor: Colors.redAccent,
-            onPressed: () {
-              //Sign out function
+            onPressed: () async {
+              //For showing progress dialog
+              Dialogs.showProgressBar(context);
 
-              APIs.auth.signOut();
-              GoogleSignIn().signOut();
-              Navigator.pushReplacement(context,
-                  MaterialPageRoute(builder: (context) => LoginScreen()));
+              //Sign out from app
+              await APIs.auth.signOut().then((value) async {
+               await GoogleSignIn().signOut().then((value) {});
+
+               //For hiding progress dialog
+               Navigator.pop(context);
+
+               //For moving home screen
+               Navigator.pop(context);
+
+               //Replacing home screen to login screen
+               Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => LoginScreen()));
+              });
+              // APIs.auth.signOut();
+              // GoogleSignIn().signOut();
+              // Navigator.pushReplacement(context,
+              //     MaterialPageRoute(builder: (context) => LoginScreen()));
             },
             icon: const Icon(
               Icons.logout_outlined,
@@ -66,19 +81,35 @@ class _ProfileScreenState extends State<ProfileScreen> {
               //For adding some space
               SizedBox(width: mq.width, height: mq.height * 0.05),
 
-              ClipRRect(
-                borderRadius: BorderRadius.circular(mq.height * 0.40),
-                child: CachedNetworkImage(
-                  fit: BoxFit.fill,
-                  height: mq.height * 0.2,
-                  width: mq.width * 0.45,
-                  //user profile picture
-                  imageUrl: widget.user.image,
-                  //placeholder: (context, url) => CircularProgressIndicator(),
-                  errorWidget: (context, url, error) =>
-                      CircleAvatar(child: Icon(CupertinoIcons.person)),
+              Stack(children: [
+                //Profile image
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(mq.height * 0.40),
+                  child: CachedNetworkImage(
+                    fit: BoxFit.fill,
+                    height: mq.height * 0.2,
+                    width: mq.width * 0.45,
+                    //user profile picture
+                    imageUrl: widget.user.image,
+                    //placeholder: (context, url) => CircularProgressIndicator(),
+                    errorWidget: (context, url, error) =>
+                        CircleAvatar(child: Icon(CupertinoIcons.person)),
+                  ),
                 ),
-              ),
+
+                //Edit image button
+                Positioned(
+                  bottom: 0,
+                  right: 0,
+                  child: MaterialButton(
+                    shape: const CircleBorder(),
+                    onPressed: () {},
+                    elevation: 2,
+                     color: Colors.white,
+                    child: Icon(Icons.edit, color: Colors.black,),
+                  ),
+                )
+              ]),
 
               //For adding some space
               SizedBox(height: mq.height * 0.03),

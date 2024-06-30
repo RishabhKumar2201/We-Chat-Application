@@ -61,7 +61,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
       // Used to fetch data simultaneously from database
       body: StreamBuilder(
-        stream: APIs.firestore.collection('users').snapshots(),
+        stream: APIs.getAllUsers(),
         builder: (context, snapshot) {
           switch (snapshot.connectionState) {
             //if data is loading
