@@ -9,6 +9,9 @@ class APIs {
   //For accessing cloud firestore database
   static FirebaseFirestore firestore = FirebaseFirestore.instance;
 
+  //for storing self information
+  static late ChatUser me;
+
   //to return current user
   static User get user => auth.currentUser!;
 
@@ -17,9 +20,21 @@ class APIs {
     return (await firestore.collection('users').doc(user.uid).get()).exists;
   }
 
+  //For getting current user info
+  static Future<void> getSelfInfo() async {
+    await firestore.collection('users').doc(user.uid).get().then((user) async {
+
+      if(user.exists){
+        me = ChatUser.fromJson(user.data()!);
+      }
+      else{
+        await createUser().then((value) => getSelfInfo());
+      }
+    });
+  }
+
   //for creating a new user
   static Future<void> createUser() async {
-
     final time = DateTime.now().millisecondsSinceEpoch.toString();
 
     final chatUser = ChatUser(
@@ -34,11 +49,16 @@ class APIs {
         pushToken: '');
 
     return await firestore
-            .collection('users')
-            .doc(user.uid).set(chatUser.toJson());
+        .collection('users')
+        .doc(user.uid)
+        .set(chatUser.toJson());
   }
 
+  //For getting all users from firestore database
   static Stream<QuerySnapshot<Map<String, dynamic>>> getAllUsers() {
-    return firestore.collection('users').snapshots();
+    return firestore
+        .collection('users')
+        .where('id', isNotEqualTo: user.uid) //for getting all users except the user's own data
+        .snapshots();
   }
 }

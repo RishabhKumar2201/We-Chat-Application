@@ -1,6 +1,3 @@
-import 'dart:convert';
-import 'dart:developer';
-
 import 'package:chat_app/api/apis.dart';
 import 'package:chat_app/models/chat_user.dart';
 import 'package:chat_app/screens/auth/login_screen.dart';
@@ -22,6 +19,13 @@ class _HomeScreenState extends State<HomeScreen> {
   List<ChatUser> list = [];
 
   @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    APIs.getSelfInfo();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       //appBar
@@ -38,7 +42,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
           //More feature button
           IconButton(onPressed: () {
-            Navigator.push(context, MaterialPageRoute(builder: (_) => ProfileScreen(user: list[0],)));
+            Navigator.push(context, MaterialPageRoute(builder: (_) => ProfileScreen(user: APIs.me)));
           }, icon: Icon(Icons.more_vert))
         ],
       ),
