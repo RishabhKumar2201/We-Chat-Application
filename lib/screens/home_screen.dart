@@ -3,6 +3,7 @@ import 'package:chat_app/models/chat_user.dart';
 import 'package:chat_app/screens/auth/login_screen.dart';
 import 'package:chat_app/screens/profile_screen.dart';
 import 'package:chat_app/widgets/chat_user_card.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
@@ -16,7 +17,13 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  List<ChatUser> list = [];
+  //for storing all users
+  List<ChatUser> _list = [];
+
+  final List<ChatUser> _searchList = []; //to store searched item
+
+  //for storing search status
+  bool _isSearching = false;
 
   @override
   void initState() {
@@ -31,19 +38,60 @@ class _HomeScreenState extends State<HomeScreen> {
       //appBar
       appBar: AppBar(
         leading: Icon(Icons.home),
-        title: Text(
-          "We Chat",
-          style: TextStyle(
-              color: Colors.black, fontWeight: FontWeight.normal, fontSize: 19),
-        ),
+        title: _isSearching
+            ? TextField(
+                decoration: InputDecoration(
+                    //border: InputBorder.none,
+                    hintText: 'Name, Email, ...'),
+                autofocus: true,
+                style: TextStyle(fontSize: 17, letterSpacing: 0.5),
+
+                //Search Functionality
+                onChanged: (val) {
+                  //Searching logic
+                  _searchList.clear();
+
+                  for (var i in _list) {
+                    if (i.name.toLowerCase().contains(val.toLowerCase()) ||
+                        i.email.toLowerCase().contains(val.toLowerCase())) {
+                      _searchList.add(i);
+                    }
+
+                    //to update the search list after adding searched value
+                    setState(() {
+                      _searchList;
+                    });
+                  }
+                },
+              )
+            : Text(
+                "We Chat",
+                style: TextStyle(
+                    color: Colors.black,
+                    fontWeight: FontWeight.normal,
+                    fontSize: 19),
+              ),
         actions: [
           //Search user button
-          IconButton(onPressed: () {}, icon: Icon(Icons.search)),
+          IconButton(
+              onPressed: () {
+                setState(() {
+                  _isSearching = !_isSearching;
+                });
+              },
+              icon: Icon(_isSearching
+                  ? CupertinoIcons.clear_circled_solid
+                  : Icons.search)),
 
           //More feature button
-          IconButton(onPressed: () {
-            Navigator.push(context, MaterialPageRoute(builder: (_) => ProfileScreen(user: APIs.me)));
-          }, icon: Icon(Icons.more_vert))
+          IconButton(
+              onPressed: () {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (_) => ProfileScreen(user: APIs.me)));
+              },
+              icon: Icon(Icons.more_vert))
         ],
       ),
 
@@ -54,11 +102,11 @@ class _HomeScreenState extends State<HomeScreen> {
           onPressed: () {
             //Sign out function
 
-               APIs.auth.signOut();
-               GoogleSignIn().signOut();
-               Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => LoginScreen()));
-
-            },
+            APIs.auth.signOut();
+            GoogleSignIn().signOut();
+            Navigator.pushReplacement(context,
+                MaterialPageRoute(builder: (context) => LoginScreen()));
+          },
           child: Icon(Icons.add_comment_rounded),
         ),
       ),
@@ -78,24 +126,24 @@ class _HomeScreenState extends State<HomeScreen> {
             case ConnectionState.done:
               final data = snapshot.data?.docs;
               //Store the data in form of list (The syntax works like for loop only)
-              list =
+              _list =
                   data?.map((e) => ChatUser.fromJson(e.data())).toList() ?? [];
 
-              if (list.isNotEmpty) {
+              if (_list.isNotEmpty) {
                 return ListView.builder(
-                    itemCount: list.length,
+                    itemCount: _isSearching ? _searchList.length : _list.length,
                     padding: EdgeInsets.only(top: mq.height * 0.01),
                     physics: BouncingScrollPhysics(),
                     itemBuilder: (context, index) {
-                      return ChatUserCard(user: list[index]);
+                      return ChatUserCard(user: _isSearching ? _searchList[index] : _list[index]);
                       //return Text('Name: ${list[index]}');
                     });
-              }
-              else{
+              } else {
                 return const Center(
-                  child: Text("No connection found!", style: TextStyle(
-                    fontSize: 20
-                  ),),
+                  child: Text(
+                    "No connection found!",
+                    style: TextStyle(fontSize: 20),
+                  ),
                 );
               }
           }
