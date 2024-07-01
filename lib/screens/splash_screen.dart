@@ -26,7 +26,7 @@ class _SplashScreenState extends State<SplashScreen> {
 
       //Set status bar color to transparent
       SystemChrome.setSystemUIOverlayStyle(
-          const SystemUiOverlayStyle(statusBarColor: Colors.transparent));
+          const SystemUiOverlayStyle(systemNavigationBarColor: Colors.white));
 
       //Check if user is already signed in
       if (APIs.auth.currentUser != null) {

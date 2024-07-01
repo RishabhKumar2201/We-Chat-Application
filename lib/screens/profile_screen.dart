@@ -112,7 +112,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         right: 0,
                         child: MaterialButton(
                           shape: const CircleBorder(),
-                          onPressed: () {},
+                          onPressed: () {
+                            _showBottomSheet();
+                          },
                           elevation: 2,
                           color: Colors.white,
                           child: Icon(
@@ -141,7 +143,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     //Input field of User Name section
                     TextFormField(
                         initialValue: widget.user.name,
-
                         onChanged: (val) =>
                             APIs.me.name = val ?? "", //to update the value
                         validator: (val) => val != null && val.isNotEmpty
@@ -166,9 +167,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     // Input field of About section
                     TextFormField(
                         initialValue: widget.user.about,
-
                         onChanged: (val) =>
-                        APIs.me.about = val ?? "", //to update the value
+                            APIs.me.about = val ?? "", //to update the value
                         validator: (val) => val != null && val.isNotEmpty
                             ? null
                             : 'Required Field', //to show warning if null value is passed
@@ -182,8 +182,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               style: TextStyle(fontSize: mq.height * 0.023),
                             ),
                             border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(10)))
-                    ),
+                                borderRadius: BorderRadius.circular(10)))),
 
                     //for adding more space
                     SizedBox(height: mq.height * 0.05),
@@ -195,10 +194,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           shape: StadiumBorder(),
                           minimumSize: Size(mq.width * 0.5, mq.height * 0.06)),
                       onPressed: () {
-                        if(_formKey.currentState!.validate()){
+                        if (_formKey.currentState!.validate()) {
                           _formKey.currentState!.save();
-                          APIs.updateUserInfo().then((value){
-                            Dialogs.showSnackbar(context, 'Profile updated successfully!');
+                          APIs.updateUserInfo().then((value) {
+                            Dialogs.showSnackbar(
+                                context, 'Profile updated successfully!');
                           });
                         }
                       },
@@ -218,5 +218,59 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
           )),
     );
+  }
+
+  //bottom sheet for picking a profile picture for user
+  void _showBottomSheet() {
+    showModalBottomSheet(
+        context: context,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(20), topRight: Radius.circular(20)),
+        ),
+        builder: (_) {
+          return ListView(
+            shrinkWrap:
+                true, //it cover only the area which is required to by the content of ListView
+            padding: EdgeInsets.only(
+                top: mq.height * 0.02, bottom: mq.height * 0.07),
+            children: [
+              const Text(
+                "Pick Profile Picture",
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 19, fontWeight: FontWeight.w500),
+              ),
+
+              SizedBox(
+                height: mq.height * 0.02,
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  //pick from gallery button
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.white,
+                      shape: CircleBorder(),
+                      fixedSize: Size(mq.width * 0.3 , mq.height * 0.15)
+                    ),
+                      onPressed: (){},
+                      child: Image.asset('images/add_image.png')),
+
+                  //pick from camera capturing button
+                  ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.white,
+                          shape: CircleBorder(),
+                          fixedSize: Size(mq.width * 0.3 , mq.height * 0.15)
+                      ),
+                      onPressed: (){},
+                      child: Image.asset('images/camera.png'))
+
+                ],
+              )
+            ],
+          );
+        });
   }
 }
