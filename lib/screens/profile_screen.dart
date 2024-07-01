@@ -1,3 +1,5 @@
+import 'dart:developer';
+import 'dart:io';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:chat_app/api/apis.dart';
 import 'package:chat_app/helper/dialogs.dart';
@@ -6,6 +8,7 @@ import 'package:chat_app/screens/auth/login_screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:image_picker/image_picker.dart';
 
 import '../main.dart';
 
@@ -22,6 +25,8 @@ class ProfileScreen extends StatefulWidget {
 class _ProfileScreenState extends State<ProfileScreen> {
   final _formKey = GlobalKey<
       FormState>(); //for checking whether entry in form has been changed
+
+  String? _image;
 
   @override
   Widget build(BuildContext context) {
@@ -91,11 +96,24 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     SizedBox(width: mq.width, height: mq.height * 0.05),
 
                     Stack(children: [
-                      //Profile image
+                      //Profile picture
+                      _image != null ?
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(mq.height * 0.40),
+                        child: Image.file(
+                          File(_image!),
+                          fit: BoxFit.cover,
+                          height: mq.height * 0.2,
+                          width: mq.width * 0.45,
+                        ),
+                      )
+                          :
+
+                          //image from server (data which is fetched automatically)
                       ClipRRect(
                         borderRadius: BorderRadius.circular(mq.height * 0.40),
                         child: CachedNetworkImage(
-                          fit: BoxFit.fill,
+                          fit: BoxFit.cover,
                           height: mq.height * 0.2,
                           width: mq.width * 0.45,
                           //user profile picture
@@ -240,7 +258,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 textAlign: TextAlign.center,
                 style: TextStyle(fontSize: 19, fontWeight: FontWeight.w500),
               ),
-
               SizedBox(
                 height: mq.height * 0.02,
               ),
@@ -249,12 +266,28 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 children: [
                   //pick from gallery button
                   ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.white,
-                      shape: CircleBorder(),
-                      fixedSize: Size(mq.width * 0.3 , mq.height * 0.15)
-                    ),
-                      onPressed: (){},
+                      style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.white,
+                          shape: CircleBorder(),
+                          fixedSize: Size(mq.width * 0.3, mq.height * 0.15)),
+                      onPressed: () async {
+                        final ImagePicker picker = ImagePicker();
+                        // Pick an image
+                        final XFile? image =
+                            await picker.pickImage(source: ImageSource.gallery, imageQuality: 80);
+
+                        if (image != null) {
+                          log('Image path: ${image.path} -- MimeType: ${image.mimeType}'); //mimetype tells image format
+                          setState(() {
+                            _image = image.path;
+                          });
+                          APIs.updateProfilePicture(File(_image!));
+
+                          //for hiding bottom sheet
+                          Navigator.pop(context);
+                        }
+
+                      },
                       child: Image.asset('images/add_image.png')),
 
                   //pick from camera capturing button
@@ -262,11 +295,25 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.white,
                           shape: CircleBorder(),
-                          fixedSize: Size(mq.width * 0.3 , mq.height * 0.15)
-                      ),
-                      onPressed: (){},
-                      child: Image.asset('images/camera.png'))
+                          fixedSize: Size(mq.width * 0.3, mq.height * 0.15)),
+                      onPressed: () async {
+                        final ImagePicker picker = ImagePicker();
+                        // Pick an image
+                        final XFile? image =
+                            await picker.pickImage(source: ImageSource.camera, imageQuality: 80);
 
+                        if (image != null) {
+                          log('Image path: ${image.path}'); //mimetype tells image format
+                          setState(() {
+                            _image = image.path;
+                          });
+                          APIs.updateProfilePicture(File(_image!));
+
+                          //for hiding bottom sheet
+                          Navigator.pop(context);
+                        }
+                      },
+                      child: Image.asset('images/camera.png'))
                 ],
               )
             ],

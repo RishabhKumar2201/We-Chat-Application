@@ -23,6 +23,10 @@ dependencies:
   cloud_firestore:
   # For showing network image
   cached_network_image:
+  # For picking images
+  image_picker:
+  # For accessing Firebase Storage (for uploading files)
+  firebase_storage:
 
 dev_dependencies:
   flutter_test:
