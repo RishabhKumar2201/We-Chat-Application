@@ -3,12 +3,13 @@ import 'dart:developer';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:chat_app/models/chat_user.dart';
+import 'package:chat_app/widgets/message_card.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 
 import '../api/apis.dart';
 import '../main.dart';
+import '../models/message.dart';
 
 class ChatScreen extends StatefulWidget {
   final ChatUser user;
@@ -19,6 +20,9 @@ class ChatScreen extends StatefulWidget {
 }
 
 class _ChatScreenState extends State<ChatScreen> {
+  //for storing all messages
+  List<Message> _list = [];
+
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -27,6 +31,9 @@ class _ChatScreenState extends State<ChatScreen> {
           automaticallyImplyLeading: false,
           flexibleSpace: _appBar(),
         ),
+        
+        backgroundColor: Color.fromARGB(255, 234, 248, 255),
+
         body: Column(
           children: [
             Expanded(
@@ -34,12 +41,12 @@ class _ChatScreenState extends State<ChatScreen> {
                 stream: APIs.getAllMessages(),
                 builder: (context, snapshot) {
                   switch (snapshot.connectionState) {
-                  //if data is loading
+                    //if data is loading
                     case ConnectionState.waiting:
                     case ConnectionState.none:
-                       return const Center(child: CircularProgressIndicator());
-              
-                  //If some or all data is loaded then show it
+                      return const Center(child: CircularProgressIndicator());
+
+                    //If some or all data is loaded then show it
                     case ConnectionState.active:
                     case ConnectionState.done:
                       final data = snapshot.data?.docs;
@@ -47,15 +54,32 @@ class _ChatScreenState extends State<ChatScreen> {
                       //Store the data in form of list (The syntax works like for loop only)
                       // _list =
                       //     data?.map((e) => ChatUser.fromJson(e.data())).toList() ?? [];
-              
-                      final _list = ["Hey", "Hello"];
+
+                      _list.clear();
+                      _list.add(Message(
+                          toId: 'xyz',
+                          msg: 'Hii',
+                          read: '',
+                          type: Type.text,
+                          fromId: APIs.user.uid,
+                          sent: '12:00 AM'));
+                      _list.add(Message(
+                          toId: APIs.user.uid,
+                          msg: 'Hello',
+                          read: '',
+                          type: Type.text,
+                          fromId: 'xyz',
+                          sent: '12:05 AM'));
+
                       if (_list.isNotEmpty) {
                         return ListView.builder(
                             itemCount: _list.length,
                             padding: EdgeInsets.only(top: mq.height * 0.01),
                             physics: BouncingScrollPhysics(),
                             itemBuilder: (context, index) {
-                              return Text('Message: ${_list[index]}');
+                              return MessageCard(
+                                message: _list[index],
+                              );
                             });
                       } else {
                         return const Center(
@@ -69,7 +93,6 @@ class _ChatScreenState extends State<ChatScreen> {
                 },
               ),
             ),
-
             _chatInput(),
           ],
         ),
@@ -137,7 +160,8 @@ class _ChatScreenState extends State<ChatScreen> {
   //button chat input field
   Widget _chatInput() {
     return Padding(
-      padding:  EdgeInsets.symmetric(vertical: mq.height * 0.01, horizontal: mq.width * 0.025),
+      padding: EdgeInsets.symmetric(
+          vertical: mq.height * 0.01, horizontal: mq.width * 0.025),
       child: Row(
         children: [
           Expanded(
@@ -150,23 +174,19 @@ class _ChatScreenState extends State<ChatScreen> {
                   //emoji button
                   IconButton(
                       onPressed: () {},
-                      icon: const Icon(
-                        Icons.emoji_emotions,
-                        color: Colors.blueAccent,
-                        size: 26)),
+                      icon: const Icon(Icons.emoji_emotions,
+                          color: Colors.blueAccent, size: 26)),
 
                   //text field (rounded in expanded widget to take the available space w.r.t its parent)
                   const Expanded(
                       child: TextField(
-                        keyboardType: TextInputType.multiline,
-                        maxLines: null,
-                        decoration: const InputDecoration(
-                          hintText: "Type something ...",
-                          hintStyle: TextStyle(
-                            color: Colors.blueAccent),
-                          border: InputBorder.none
-                        ),
-                      )),
+                    keyboardType: TextInputType.multiline,
+                    maxLines: null,
+                    decoration: const InputDecoration(
+                        hintText: "Type something ...",
+                        hintStyle: TextStyle(color: Colors.blueAccent),
+                        border: InputBorder.none),
+                  )),
 
                   //gallery image picker button
                   IconButton(
@@ -191,15 +211,18 @@ class _ChatScreenState extends State<ChatScreen> {
           ),
 
           //send message button
-          MaterialButton(onPressed: (){},
+          MaterialButton(
+            onPressed: () {},
             minWidth: 0,
             padding: EdgeInsets.only(top: 10, bottom: 10, left: 10, right: 5),
             shape: const CircleBorder(),
             color: Colors.green,
-          child: const Icon(Icons.send, color: Colors.white, size: 28,),
+            child: const Icon(
+              Icons.send,
+              color: Colors.white,
+              size: 28,
+            ),
           ),
-
-
         ],
       ),
     );
