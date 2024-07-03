@@ -100,7 +100,7 @@ class _MessageCardState extends State<MessageCard> {
         Flexible(
           //Expanded covers entire space but flexible covers only required space between limits
           child: Container(
-            padding: EdgeInsets.only(left: mq.width * 0.03, right: mq.width * 0.03, top: mq.height * 0.01, bottom: mq.height * 0.000000001),
+            padding: EdgeInsets.only(left: mq.width * 0.03, right: mq.width * 0.03, top: mq.height * 0.01, bottom: mq.height * 0.009),
             margin: EdgeInsets.symmetric(
                 horizontal: mq.width * 0.03, vertical: mq.height * 0.01),
             decoration: BoxDecoration(

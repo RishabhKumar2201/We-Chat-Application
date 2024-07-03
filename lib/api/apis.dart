@@ -114,6 +114,7 @@ class APIs {
       ChatUser user) {
     return firestore
         .collection('chats/${getConversationId(user.id)}/messages/')
+    .orderBy('sent', descending: true)
         .snapshots();
   }
 
@@ -149,7 +150,7 @@ class APIs {
       ChatUser user) {
     return firestore
         .collection('chats/${getConversationId(user.id)}/messages/')
-    .orderBy('sent', descending: true)
+        .orderBy('sent', descending: true)
         .limit(1)
         .snapshots();
   }
