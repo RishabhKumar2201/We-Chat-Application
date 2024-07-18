@@ -17,10 +17,7 @@ import 'package:flutter/foundation.dart'
 class DefaultFirebaseOptions {
   static FirebaseOptions get currentPlatform {
     if (kIsWeb) {
-      throw UnsupportedError(
-        'DefaultFirebaseOptions have not been configured for web - '
-        'you can reconfigure this by running the FlutterFire CLI again.',
-      );
+      return web;
     }
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
@@ -28,15 +25,9 @@ class DefaultFirebaseOptions {
       case TargetPlatform.iOS:
         return ios;
       case TargetPlatform.macOS:
-        throw UnsupportedError(
-          'DefaultFirebaseOptions have not been configured for macos - '
-          'you can reconfigure this by running the FlutterFire CLI again.',
-        );
+        return macos;
       case TargetPlatform.windows:
-        throw UnsupportedError(
-          'DefaultFirebaseOptions have not been configured for windows - '
-          'you can reconfigure this by running the FlutterFire CLI again.',
-        );
+        return windows;
       case TargetPlatform.linux:
         throw UnsupportedError(
           'DefaultFirebaseOptions have not been configured for linux - '
@@ -66,6 +57,35 @@ class DefaultFirebaseOptions {
     androidClientId: '472410946370-f3ds2r35c56tbnpi3na9gsrgv6ccvq4p.apps.googleusercontent.com',
     iosClientId: '472410946370-rrvm7fjsrv3tq2eh766bvqucj6hacsiu.apps.googleusercontent.com',
     iosBundleId: 'com.example.chatApp',
+  );
+
+  static const FirebaseOptions web = FirebaseOptions(
+    apiKey: 'AIzaSyA79pFF4g9bTtlXDampQbwquyva8Z3tmwE',
+    appId: '1:472410946370:web:a06a23a916611e3cb3e6db',
+    messagingSenderId: '472410946370',
+    projectId: 'we-chat-b07f4',
+    authDomain: 'we-chat-b07f4.firebaseapp.com',
+    storageBucket: 'we-chat-b07f4.appspot.com',
+  );
+
+  static const FirebaseOptions macos = FirebaseOptions(
+    apiKey: 'AIzaSyDPolFbjncsB2Pyh6Oe9qrhB8Y8d1qKDG8',
+    appId: '1:472410946370:ios:f5c803c12b48c50ab3e6db',
+    messagingSenderId: '472410946370',
+    projectId: 'we-chat-b07f4',
+    storageBucket: 'we-chat-b07f4.appspot.com',
+    androidClientId: '472410946370-f3ds2r35c56tbnpi3na9gsrgv6ccvq4p.apps.googleusercontent.com',
+    iosClientId: '472410946370-rrvm7fjsrv3tq2eh766bvqucj6hacsiu.apps.googleusercontent.com',
+    iosBundleId: 'com.example.chatApp',
+  );
+
+  static const FirebaseOptions windows = FirebaseOptions(
+    apiKey: 'AIzaSyA79pFF4g9bTtlXDampQbwquyva8Z3tmwE',
+    appId: '1:472410946370:web:1e77d716e0514835b3e6db',
+    messagingSenderId: '472410946370',
+    projectId: 'we-chat-b07f4',
+    authDomain: 'we-chat-b07f4.firebaseapp.com',
+    storageBucket: 'we-chat-b07f4.appspot.com',
   );
 
 }
