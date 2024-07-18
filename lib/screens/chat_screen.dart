@@ -1,11 +1,13 @@
-import 'dart:convert';
+import 'dart:io';
 import 'dart:developer';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:chat_app/models/chat_user.dart';
 import 'package:chat_app/widgets/message_card.dart';
+import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 
 import '../api/apis.dart';
 import '../main.dart';
@@ -26,62 +28,116 @@ class _ChatScreenState extends State<ChatScreen> {
   //for handling message text changes
   final _textController = TextEditingController();
 
+  // _showEmoji -- for storing value for showing or hiding emojis
+  // _isUploading -- for checking if message is uploading or not
+  bool _showEmoji = false, _isUploading = false;
+
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Scaffold(
-        appBar: AppBar(
-          automaticallyImplyLeading: false,
-          flexibleSpace: _appBar(),
-        ),
-        backgroundColor: Color.fromARGB(255, 234, 248, 255),
-        body: Column(
-          children: [
-            Expanded(
-              child: StreamBuilder(
-                stream: APIs.getAllMessages(widget.user),
-                builder: (context, snapshot) {
-                  switch (snapshot.connectionState) {
-                    //if data is loading
-                    case ConnectionState.waiting:
-                    case ConnectionState.none:
-                      return const SizedBox();
-
-                    //If some or all data is loaded then show it
-                    case ConnectionState.active:
-                    case ConnectionState.done:
-                      final data = snapshot.data?.docs;
-                      //Store the data in form of list (The syntax works like for loop only)
-                      _list =
-                          data?.map((e) => Message.fromJson(e.data())).toList() ?? [];
-
-
-
-                      if (_list.isNotEmpty) {
-                        return ListView.builder(
-                          reverse: true,
-                            itemCount: _list.length,
-                            padding: EdgeInsets.only(top: mq.height * 0.01),
-                            physics: BouncingScrollPhysics(),
-                            itemBuilder: (context, index) {
-                              return MessageCard(
-                                message: _list[index],
-                              );
-                            });
-                      } else {
-                        return const Center(
-                          child: Text(
-                            "Say Hii! 👋",
-                            style: TextStyle(fontSize: 20),
-                          ),
-                        );
-                      }
-                  }
-                },
-              ),
+    return GestureDetector(
+      onTap: () => FocusScope.of(context).unfocus(),
+      child: SafeArea(
+        child: WillPopScope(
+          //if emojis are shown & back button is pressed then hide emojis
+          // or else simply close current screen on back button click
+          onWillPop: () {
+            if (_showEmoji) {
+              setState(() {
+                _showEmoji = !_showEmoji;
+              });
+              return Future.value(false);
+            } else {
+              return Future.value(true);
+            }
+          },
+          child: Scaffold(
+            appBar: AppBar(
+              automaticallyImplyLeading: false,
+              flexibleSpace: _appBar(),
             ),
-            _chatInput(),
-          ],
+            backgroundColor: Color.fromARGB(255, 234, 248, 255),
+            body: Column(
+              children: [
+                Expanded(
+                  child: StreamBuilder(
+                    stream: APIs.getAllMessages(widget.user),
+                    builder: (context, snapshot) {
+                      switch (snapshot.connectionState) {
+                        //if data is loading
+                        case ConnectionState.waiting:
+                        case ConnectionState.none:
+                          return const SizedBox();
+
+                        //If some or all data is loaded then show it
+                        case ConnectionState.active:
+                        case ConnectionState.done:
+                          final data = snapshot.data?.docs;
+                          //Store the data in form of list (The syntax works like for loop only)
+                          _list = data
+                                  ?.map((e) => Message.fromJson(e.data()))
+                                  .toList() ??
+                              [];
+
+                          if (_list.isNotEmpty) {
+                            return ListView.builder(
+                                reverse: true,
+                                itemCount: _list.length,
+                                padding: EdgeInsets.only(top: mq.height * 0.01),
+                                physics: BouncingScrollPhysics(),
+                                itemBuilder: (context, index) {
+                                  return MessageCard(
+                                    message: _list[index],
+                                  );
+                                });
+                          } else {
+                            return const Center(
+                              child: Text(
+                                "Say Hii! 👋",
+                                style: TextStyle(fontSize: 20),
+                              ),
+                            );
+                          }
+                      }
+                    },
+                  ),
+                ),
+
+                //progress indicator for showing uploading image
+                if (_isUploading)
+                  const Align(
+                      alignment: Alignment.centerRight,
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 8.0, vertical: 20),
+                        child: CircularProgressIndicator(
+                            strokeWidth:
+                                2), //strokewidth is used to reduce fontWight og indicator
+                      )),
+
+                // chat input field
+                _chatInput(),
+
+                if (_showEmoji)
+                  SizedBox(
+                      height: mq.height * 0.35,
+                      child: EmojiPicker(
+                        textEditingController: _textController,
+                        config: Config(
+                            height: 256,
+                            //checkPlatformCompatibility: true,
+                            emojiViewConfig: EmojiViewConfig(
+                              columns: 7,
+
+                              //   emojiSizeMax: 32 *
+                              //       (Platform.isIOS
+                              //           ?  1.20
+                              //           :  1.0),
+                              // ),
+                            )),
+                      ))
+              ],
+            ),
+          ),
         ),
       ),
     );
@@ -160,16 +216,22 @@ class _ChatScreenState extends State<ChatScreen> {
                 children: [
                   //emoji button
                   IconButton(
-                      onPressed: () {},
+                      onPressed: () {
+                        FocusScope.of(context).unfocus();
+                        setState(() => _showEmoji = !_showEmoji);
+                      },
                       icon: const Icon(Icons.emoji_emotions,
                           color: Colors.blueAccent, size: 26)),
 
                   //text field (rounded in expanded widget to take the available space w.r.t its parent)
                   Expanded(
                       child: TextField(
-                        controller: _textController,
+                    controller: _textController,
                     keyboardType: TextInputType.multiline,
                     maxLines: null,
+                    onTap: () {
+                      if (_showEmoji) setState(() => _showEmoji = !_showEmoji);
+                    },
                     decoration: const InputDecoration(
                         hintText: "Type something ...",
                         hintStyle: TextStyle(color: Colors.blueAccent),
@@ -178,16 +240,46 @@ class _ChatScreenState extends State<ChatScreen> {
 
                   //gallery image picker button
                   IconButton(
-                      onPressed: () {},
-                      icon: const Icon(
-                        Icons.image,
-                        color: Colors.blueAccent,
-                        size: 26,
-                      )),
+                    onPressed: () async {
+                      final ImagePicker picker = ImagePicker();
 
-                  //take camera image button
+                      //Picking multiple images
+                      final List<XFile> images =
+                          await picker.pickMultiImage(imageQuality: 70);
+
+                      //uploading and sending image one by one
+                      for (var i in images) {
+                        log('Image Path: ${i.path}');
+                        setState(() => _isUploading = true);
+                        await APIs.sendChatImage(widget.user, File(i.path));
+                        setState(() => _isUploading = false);
+                      }
+                    },
+                    icon: const Icon(
+                      Icons.image,
+                      color: Colors.blueAccent,
+                      size: 26,
+                    ),
+                  ),
+
+                  //take image from camera button
                   IconButton(
-                      onPressed: () {},
+                      onPressed: () async {
+                        final ImagePicker picker = ImagePicker();
+
+                        //Pick an image
+                        final XFile? image = await picker.pickImage(
+                            source: ImageSource.camera, imageQuality: 70);
+
+                        if (image != null) {
+                          log('Image path: ${image.path}'); //mimetype tells image format
+                          setState(() => _isUploading = true);
+
+                          await APIs.sendChatImage(
+                              widget.user, File(image.path));
+                          setState(() => _isUploading = false);
+                        }
+                      },
                       icon: const Icon(
                         Icons.camera_alt_rounded,
                         color: Colors.blueAccent,
@@ -201,8 +293,8 @@ class _ChatScreenState extends State<ChatScreen> {
           //send message button
           MaterialButton(
             onPressed: () {
-              if(_textController.text.isNotEmpty){
-                APIs.sendMessage(widget.user, _textController.text);
+              if (_textController.text.isNotEmpty) {
+                APIs.sendMessage(widget.user, _textController.text, Type.text);
                 _textController.text = "";
               }
             },
