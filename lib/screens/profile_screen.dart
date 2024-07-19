@@ -5,6 +5,7 @@ import 'package:chat_app/api/apis.dart';
 import 'package:chat_app/helper/dialogs.dart';
 import 'package:chat_app/models/chat_user.dart';
 import 'package:chat_app/screens/auth/login_screen.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -53,12 +54,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 //For showing progress dialog
                 Dialogs.showProgressBar(context);
 
+                await APIs.updateActiveStatus(false);
+                
                 //Sign out from app
                 await APIs.auth.signOut().then((value) async {
                   await GoogleSignIn().signOut().then((value) {});
 
                   //For hiding progress dialog
                   Navigator.pop(context);
+
+                  APIs.auth = FirebaseAuth.instance;
 
                   //For moving home screen
                   Navigator.pop(context);
