@@ -78,7 +78,7 @@ class APIs {
         .update({'name': me.name, 'about': me.about});
   }
 
-  //for updating profile picture
+  //for updating profile picture of user
   static Future<void> updateProfilePicture(File file) async {
     //getting image file extension
     final ext = file.path.split('.').last;
@@ -102,6 +102,25 @@ class APIs {
         .update({'image': me.image});
   }
 
+  //for getting specific user info
+  static Stream<QuerySnapshot<Map<String, dynamic>>> getUserInfo(
+      ChatUser chatUser) {
+    return firestore
+        .collection('users')
+        .where('id',
+            isEqualTo:
+                chatUser.id) //for getting all users except the user's own data
+        .snapshots();
+  }
+
+  //update online or last active status of user
+  static Future<void> updateActiveStatus(bool isOnline) async {
+    firestore.collection('users').doc(user.uid).update({
+      'is_online': isOnline,
+      'last_active': DateTime.now().millisecondsSinceEpoch.toString()
+    });
+  }
+
   /*         ****** CHAT SCREEN RELATED APIS ****** */
 
   //useful for getting conversation id
@@ -119,7 +138,8 @@ class APIs {
   }
 
   // Chats (collection) -> conversation_id (doc) -> messages (collection) -> message (doc)
-  static Future<void> sendMessage(ChatUser chatUser, String msg, Type type) async {
+  static Future<void> sendMessage(
+      ChatUser chatUser, String msg, Type type) async {
     //message sending time (also used as ID)
     final time = DateTime.now().millisecondsSinceEpoch.toString();
 
@@ -160,7 +180,8 @@ class APIs {
     final ext = file.path.split('.').last;
 
     //storage file reference with path
-    final ref = storage.ref().child('images/${getConversationId(chatUser.id)}/${DateTime.now().millisecondsSinceEpoch}.$ext');
+    final ref = storage.ref().child(
+        'images/${getConversationId(chatUser.id)}/${DateTime.now().millisecondsSinceEpoch}.$ext');
 
     //uploading image
     await ref

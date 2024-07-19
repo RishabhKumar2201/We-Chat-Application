@@ -2,6 +2,7 @@ import 'dart:io';
 import 'dart:developer';
 
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:chat_app/helper/my_date_util.dart';
 import 'package:chat_app/models/chat_user.dart';
 import 'package:chat_app/widgets/message_card.dart';
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
@@ -111,7 +112,7 @@ class _ChatScreenState extends State<ChatScreen> {
                             horizontal: 8.0, vertical: 20),
                         child: CircularProgressIndicator(
                             strokeWidth:
-                                2), //strokewidth is used to reduce fontWight og indicator
+                                2), //strokewidth is used to reduce fontWight of indicator
                       )),
 
                 // chat input field
@@ -145,59 +146,76 @@ class _ChatScreenState extends State<ChatScreen> {
 
   Widget _appBar() {
     return InkWell(
-      onTap: () {},
-      child: Row(
-        children: [
-          //back button
-          IconButton(
-              onPressed: () {
-                Navigator.pop(context);
-              },
-              icon: Icon(
-                Icons.arrow_back,
-                color: Colors.black54,
-              )),
+        onTap: () {},
+        child: StreamBuilder(
+            stream: APIs.getUserInfo(widget.user),
+            builder: (context, snapshot) {
+              final data = snapshot.data?.docs;
+              final list =
+                  data?.map((e) => ChatUser.fromJson(e.data())).toList() ?? [];
 
-          //user profile picture
-          ClipRRect(
-            borderRadius: BorderRadius.circular(mq.height * 0.40),
-            child: CachedNetworkImage(
-              fit: BoxFit.fill,
-              height: mq.height * 0.045,
-              width: mq.width * 0.095,
-              imageUrl: widget.user.image,
-              //placeholder: (context, url) => CircularProgressIndicator(),
-              errorWidget: (context, url, error) =>
-                  CircleAvatar(child: Icon(CupertinoIcons.person)),
-            ),
-          ),
+              return Row(
+                children: [
+                  //back button
+                  IconButton(
+                      onPressed: () {
+                        Navigator.pop(context);
+                      },
+                      icon: Icon(
+                        Icons.arrow_back,
+                        color: Colors.black54,
+                      )),
 
-          SizedBox(
-            width: 10,
-          ),
+                  //user profile picture
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(mq.height * 0.40),
+                    child: CachedNetworkImage(
+                      fit: BoxFit.fill,
+                      height: mq.height * 0.045,
+                      width: mq.width * 0.095,
+                      imageUrl:
+                          list.isNotEmpty ? list[0].image : widget.user.image,
+                      //placeholder: (context, url) => CircularProgressIndicator(),
+                      errorWidget: (context, url, error) =>
+                          CircleAvatar(child: Icon(CupertinoIcons.person)),
+                    ),
+                  ),
 
-          //showing user name and their last seen time (below)
-          Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              //user name
-              Text(widget.user.name,
-                  style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w500,
-                      color: Colors.black87)),
+                  SizedBox(
+                    width: 10,
+                  ),
 
-              //last seen time of user
-              Text(
-                'Last seen not available',
-                style: TextStyle(fontWeight: FontWeight.w400, fontSize: 13),
-              ),
-            ],
-          )
-        ],
-      ),
-    );
+                  //showing user name and their last seen time (below)
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      //user name
+                      Text(list.isNotEmpty ? list[0].name : widget.user.name,
+                          style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w500,
+                              color: Colors.black87)),
+
+                      //last seen time of user
+                      Text(
+                        list.isNotEmpty
+                            ? list[0].isOnline
+                                ? 'Online'
+                                : MyDateUtil.getLastActiveTime(
+                                    context: context,
+                                    lastActive: list[0].lastActive)
+                            : MyDateUtil.getLastActiveTime(
+                                context: context,
+                                lastActive: widget.user.lastActive),
+                        style: const TextStyle(
+                            fontWeight: FontWeight.w400, fontSize: 13),
+                      ),
+                    ],
+                  )
+                ],
+              );
+            }));
   }
 
   //button chat input field
